@@ -54,7 +54,7 @@ show_admin_bar(false);
  
  add_action('admin_menu', 'ivatar_admin_add_page');
 function ivatar_admin_add_page() {
-add_options_page('Custom iVatar Page', 'Custom iVatar Settings', 'manage_options', 'ivatar', 'ivatar_options_page');
+add_options_page('iVatar Settings Page', 'iVatar Settings', 'manage_options', 'ivatar', 'ivatar_options_page');
 }
 function ivatar_options_page() {
 ?>
@@ -74,12 +74,24 @@ add_action('admin_init', 'ivatar_admin_init');
 function ivatar_admin_init(){
 register_setting( 'ivatar_options', 'ivatar_options', 'ivatar_options_validate' );
 add_settings_section('ivatar_main', 'Main Settings', 'ivatar_section_text', 'ivatar');
-add_settings_field('ivatar_text_string', 'Font Size', 'ivatar_setting_string', 'ivatar', 'ivatar_main');
+//add_settings_field('ivatar_text_string', 'Font Size', 'ivatar_setting_string', 'ivatar', 'ivatar_main');
 add_settings_field('ivatar_color', 'Background Color', 'ivatar_setting_color', 'ivatar', 'ivatar_main');
 add_settings_field('ivatar_scheme', 'Color Scheme', 'ivatar_setting_scheme', 'ivatar', 'ivatar_main');
 }
 function ivatar_section_text() {
+$options = get_option('ivatar_options');
+if( $options['ivatar_scheme'] == 'Light' ) { 
+  $color = '#FFFFFF'; } 
+	elseif( $options['ivatar_scheme'] == 'Dark' ) { 
+	$color = '#000000'; } 
+		elseif( $options['ivatar_scheme'] == 'Shade' ) { 
+		$color = '#999999'; };
 echo '<p>Take note that these settings apply for every user.</p>';
+echo '<p>To apply the below settings, copy and paste the below declarations into your stylesheet</p>';
+echo '<textarea rows="2" cols="60">' . '.ivatar { background:' . $options["bg_color"] . ';font-size:20px;color:' . $color . ';}</textarea>';
+echo '<p>Preview:</p>';
+$styles = 'background:' . $options["bg_color"] . ';font-size:20px;color:' . $color .';width:34px;padding:10px;font-family:Open Sans;height:34px;line-height:34px';
+echo '<div style="' . $styles . '" class="avatar ivatar photo avatar-default">WP</div>';
 } 
 function ivatar_setting_string() {
 $options = get_option('ivatar_options');
@@ -108,7 +120,7 @@ function ivatar_options_validate($input) {
 $options = get_option('ivatar_options');
 $options['ivatar_scheme'] = trim($input['ivatar_scheme']);
 $options['bg_color'] = trim($input['bg_color']);
-$options['font_size'] = trim($input['font_size']);
+//$options['font_size'] = trim($input['font_size']);
 return $options;
 }
 add_action( 'admin_enqueue_scripts', 'mw_enqueue_color_picker' );
@@ -122,7 +134,7 @@ function new_ivatar_filter($avatar, $id_or_email="", $size="", $default="", $alt
  global $comment, $author;
  if (!empty($comment->user_id)) {
  
-  if (!is_admin() || show_admin_bar(false)) {
+  if (!is_admin()) {
 //$user = get_userdata($comment->user_id)
  
   //  foreach($users as $user){
@@ -133,12 +145,10 @@ function new_ivatar_filter($avatar, $id_or_email="", $size="", $default="", $alt
 		$lastInit = $getLname[0];
 
         $custom_avatar = $firstInit . $lastInit; 
-		$ivatar_width = 32;
-		$ivatar_height = 32;
-        $dimensions = ' width="'.$ivatar_width.'" height="'.$ivatar_height.'"';
-		$styles = 'font-weight:bold;padding-left:10px;'; 
 
-		$return = '<div '.$dimensions.' alt="'.$alt.'" class="avatar ivatar photo avatar-default" style="'.$styles.';" />'.$custom_avatar.'</div>';
+		$styles = 'position:absolute;left:0;padding:5px 10px;font-family:Open Sans;margin-left:-10px;width:38px;text-align:center;text-transform:uppercase;height:44px;line-height:44px;'; 
+
+		$return = '<div alt="'.$alt.'" class="ivatar" style="'.$styles.'" />'.$custom_avatar.'</div>';
 		return $return;
 		} 
 		else {
@@ -147,33 +157,24 @@ function new_ivatar_filter($avatar, $id_or_email="", $size="", $default="", $alt
 		}
 }
 else { 
-//	 $comment_ID = 0;  //reset comment ID?
-	        $comment = get_comment( $comment_ID );
+  if (!is_admin()) {
+	 $comment_ID = 0;  //reset comment ID?
+	$comment = get_comment( $comment_ID );
 	
-	        if ( empty( $comment->comment_author ) ) {
-	                if ( $comment->user_id && $user = get_userdata( $comment->user_id ) )
-	                        $author = $user->display_name;
-	                else
-	                        $author = __('? ?');
-	        } else {
-	                $author = $comment->comment_author;
-	        }
+	$name_author = $comment->comment_author;
 
-	$words = explode(" ", $author);
+	$words = explode(" ", $name_author);
 	$acronym = "";
 
 	foreach ($words as $w) {
 	$acronym .= $w[0];
 	}
-				$ivatar_width = 16;
-				$ivatar_height = 32;
-				//$dimensions = ' width="'.$ivatar_width.'" height="'.$ivatar_height.'"';
-				$dimensions = ' height="'.$ivatar_height.'"';
-				$styles = 'font-weight:bold;padding:10px;min-width:'.$ivatar_width .'px'; 
+
+				$styles = 'position:absolute;left:0;padding:5px 10px;font-family:Open Sans;margin-left:-10px;width:38px;text-align:center;text-transform:uppercase;height:44px;line-height:44px;';
 				
-		$return = '<div '.$dimensions.' alt="'.$alt.'" class="avatar ivatar photo avatar-default" style="'.$styles.';" />'.$acronym.'</div>';
+		$return = '<div alt="'.$alt.'" class="ivatar" style="'.$styles.'" />'.$acronym.'</div>';
 		return $return;
-		}
+		} }
 }
 add_filter('get_avatar', 'new_ivatar_filter', 10, 6);
 
@@ -198,16 +199,11 @@ function ivatar_customize_css()
 	$color = '#000000'; } 
 		elseif( $options['ivatar_scheme'] == 'Shade' ) { 
 		$color = '#999999'; } // end if/else 
-  if( $options['ivatar_case'] == 'Uppercase' ) { 
-  $color = '#FFFFFF'; } 
-	elseif( $options['ivatar_scheme'] == 'Lowercase' ) { 
-	$color = '#000000'; } 
-		elseif( $options['ivatar_scheme'] == 'Title' ) { 
-		$color = '#999999'; } // end if/else 
 	?>
 	<style type="text/css">
-            .ivatar { background-color:<?php echo $options['bg_color']; ?>;
-			font-size:<?php echo $options['font_size']; ?>px;
+            @import url(http://fonts.googleapis.com/css?family=Open+Sans);
+.ivatar { background-color:<?php echo $options['bg_color']; ?>;
+			font-size:20px;
 			color:<?php echo $color; ?>;
 			}
          </style>
