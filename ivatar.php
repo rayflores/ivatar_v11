@@ -1,9 +1,10 @@
 <?php
 /*
  * Plugin Name: iVatar
+ * Plugin URI: http://rayflores/plugins/ivatar/
  * Description: Replaces Users Avatar or Gravatar with Initials from Commenter or registered User First Name Last Name
  * Author: Ray Flores
- * Author URI: http://floressquad.com
+ * Author URI: http://rayflores.com
  * Version: 1.1
  */
 if(!defined('ABSPATH')){
